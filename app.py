@@ -16,7 +16,7 @@ app = Flask(__name__, template_folder='templates', static_folder='static')\
 
 import pickle
 
-with open("model.pkl", "rb") as f:
+with open("best_model.pkl", "rb") as f:
     model1 = pickle.load(f)
 
 
