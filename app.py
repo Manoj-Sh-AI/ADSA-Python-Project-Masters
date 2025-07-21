@@ -2,32 +2,26 @@ import os
 import pickle
 import numpy as np
 import pandas as pd
-import requests
-from io import BytesIO
 from flask import Flask, render_template, request, jsonify
+import warnings
+warnings.filterwarnings("ignore")
 
-# ─── sklearn-unpickle patch ───────────────────────────────────────────────────
 import sklearn.compose._column_transformer as _ct
 class _RemainderColsList: pass
 _ct._RemainderColsList = _RemainderColsList
-# ────────────────────────────────────────────────────────────────────────────────
 
-app = Flask(__name__, template_folder='templates', static_folder='static')\
+app = Flask(__name__, template_folder='templates', static_folder='static')
 
-import pickle
-
-with open("best_model.pkl", "rb") as f:
-    model1 = pickle.load(f)
-
+BASE = os.path.dirname(__file__)
+MODEL_PATH = os.path.join(BASE, 'best_model.pkl')
 
 try:
-    response = requests.get(model1)
-    response.raise_for_status()
-    model = pickle.load(BytesIO(response.content))
+    with open(MODEL_PATH, 'rb') as f:
+        model = pickle.load(f)
     FEATURE_NAMES = list(model.feature_names_in_)
-    print(f"Loaded model from URL; expecting columns: {FEATURE_NAMES}")
+    print(f"Loaded model; expecting columns: {FEATURE_NAMES}")
 except Exception as e:
-    print(f"Error loading model from {model1}:", e)
+    print(f"Error loading model from {MODEL_PATH}:", e)
     model = None
     FEATURE_NAMES = []
 
@@ -41,41 +35,33 @@ def predict():
         return jsonify({'error': 'Model not loaded. Please check the server logs.'})
 
     try:
-        # Getting and validating input
-        data = {}
-        missing = []
-        for col in FEATURE_NAMES:
-            val = request.form.get(col)
-            if val is None:
-                missing.append(col)
-            else:
-                data[col] = val
+        # Get form data
+        data = {col: request.form[col] for col in FEATURE_NAMES}
 
-        if missing:
-            return jsonify({'error': f'Missing fields: {missing}'}), 400
-
-        # Converting numeric fields
+        # Convert numeric fields
         for num_col in ['bedroom_number', 'bathroom_number', 'living_space',
                         'land_space', 'price_per_unit', 'postcode']:
             if num_col in data:
                 data[num_col] = float(data[num_col])
 
-        # Createing single-row DataFrame
+        # Create single-row DataFrame
         df = pd.DataFrame([data], columns=FEATURE_NAMES)
 
-        # Makeing prediction
+        # Predict (returns scaled prediction, e.g. 15.19)
         scaled_price = model.predict(df)[0]
-        raw_price = scaled_price * 10000  # Rescale back
+
+        # Rescale prediction (if you originally divided y by 10,000)
+        raw_price = scaled_price * 10000
 
         return jsonify({
             'price': round(raw_price, 2),
             'formatted_price': "${:,.2f}".format(round(raw_price, 2))
         })
 
+    except KeyError as e:
+        return jsonify({'error': f"Missing input field: {e}"}), 400
     except Exception as e:
         return jsonify({'error': f"An error occurred during prediction: {e}"}), 500
 
-# ─── Flask app launcher with dynamic port ─────────────────────────────────────
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))  # Use PORT env var if available
-    app.run(debug=True, host='0.0.0.0', port=port)
+    app.run(debug=True)
