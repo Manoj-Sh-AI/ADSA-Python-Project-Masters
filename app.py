@@ -17,17 +17,17 @@ app = Flask(__name__, template_folder='templates', static_folder='static')\
 import pickle
 
 with open("model.pkl", "rb") as f:
-    model = pickle.load(f)
+    model1 = pickle.load(f)
 
 
 try:
-    response = requests.get(MODEL_URL)
+    response = requests.get(model1)
     response.raise_for_status()
     model = pickle.load(BytesIO(response.content))
     FEATURE_NAMES = list(model.feature_names_in_)
     print(f"Loaded model from URL; expecting columns: {FEATURE_NAMES}")
 except Exception as e:
-    print(f"Error loading model from {MODEL_URL}:", e)
+    print(f"Error loading model from {model1}:", e)
     model = None
     FEATURE_NAMES = []
 
