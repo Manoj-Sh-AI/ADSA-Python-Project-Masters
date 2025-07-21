@@ -12,19 +12,22 @@ class _RemainderColsList: pass
 _ct._RemainderColsList = _RemainderColsList
 # ────────────────────────────────────────────────────────────────────────────────
 
-app = Flask(__name__, template_folder='templates', static_folder='static')
+app = Flask(__name__, template_folder='templates', static_folder='static')\
 
-# Updated: Use direct-download link from Google Drive (replace ID with yours if needed)
-MODEL_URL = 'https://drive.google.com/uc?export=download&id=1khIVDAs1VK6ux3c2aAAh0bO8F8joxkHN'
+import pickle
+
+with open("model.pkl", "rb") as f:
+    model = pickle.load(f)
+
 
 try:
     response = requests.get(MODEL_URL)
     response.raise_for_status()
     model = pickle.load(BytesIO(response.content))
     FEATURE_NAMES = list(model.feature_names_in_)
-    print(f"✅ Loaded model from URL; expecting columns: {FEATURE_NAMES}")
+    print(f"Loaded model from URL; expecting columns: {FEATURE_NAMES}")
 except Exception as e:
-    print(f"❌ Error loading model from {MODEL_URL}:", e)
+    print(f"Error loading model from {MODEL_URL}:", e)
     model = None
     FEATURE_NAMES = []
 
