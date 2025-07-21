@@ -41,7 +41,7 @@ def predict():
         return jsonify({'error': 'Model not loaded. Please check the server logs.'})
 
     try:
-        # Get and validate input
+        # Getting and validating input
         data = {}
         missing = []
         for col in FEATURE_NAMES:
@@ -54,16 +54,16 @@ def predict():
         if missing:
             return jsonify({'error': f'Missing fields: {missing}'}), 400
 
-        # Convert numeric fields
+        # Converting numeric fields
         for num_col in ['bedroom_number', 'bathroom_number', 'living_space',
                         'land_space', 'price_per_unit', 'postcode']:
             if num_col in data:
                 data[num_col] = float(data[num_col])
 
-        # Create single-row DataFrame
+        # Createing single-row DataFrame
         df = pd.DataFrame([data], columns=FEATURE_NAMES)
 
-        # Make prediction
+        # Makeing prediction
         scaled_price = model.predict(df)[0]
         raw_price = scaled_price * 10000  # Rescale back
 
