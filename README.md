@@ -63,7 +63,7 @@ This project aims to predict house prices using machine learning techniques. The
 
 
 ## Web App
-- Built using Streamlit
+- Built using Flask
 - Users can input features and receive real-time price estimates
 - Simple, fast, and interactive
 
