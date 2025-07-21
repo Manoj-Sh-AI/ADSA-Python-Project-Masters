@@ -75,8 +75,8 @@ This project aims to predict house prices using machine learning techniques. The
 2. Install dependencies:
 `pip install -r requirements.txt`
 
-3. Run the Streamlit app:
-`streamlit run app.py`
+3. Run the Flask app:
+`python app.py`
 
 
 ## Conclusion
