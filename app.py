@@ -14,11 +14,12 @@ _ct._RemainderColsList = _RemainderColsList
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
-MODEL_URL = 'https://drive.google.com/file/d/1khIVDAs1VK6ux3c2aAAh0bO8F8joxkHN/view?usp=sharing'
+# Updated: Use direct-download link from Google Drive (replace ID with yours if needed)
+MODEL_URL = 'https://drive.google.com/uc?export=download&id=1khIVDAs1VK6ux3c2aAAh0bO8F8joxkHN'
 
 try:
     response = requests.get(MODEL_URL)
-    response.raise_for_status()  # Raise an error for 4xx/5xx responses
+    response.raise_for_status()
     model = pickle.load(BytesIO(response.content))
     FEATURE_NAMES = list(model.feature_names_in_)
     print(f"✅ Loaded model from URL; expecting columns: {FEATURE_NAMES}")
@@ -71,5 +72,7 @@ def predict():
     except Exception as e:
         return jsonify({'error': f"An error occurred during prediction: {e}"}), 500
 
+# ─── Flask app launcher with dynamic port ─────────────────────────────────────
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))  # Use PORT env var if available
+    app.run(debug=True, host='0.0.0.0', port=port)
