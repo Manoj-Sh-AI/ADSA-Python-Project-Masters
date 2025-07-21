@@ -1,6 +1,6 @@
 # House Price Prediction Web App
 
-
+Team Members: Manoj Saligrama Harisha, Sathwika Reddy Mandha, Veera Raghava Bhogadi, Yashas Basava Raj
 A machine learning-powered web application that predicts the price of a house based on user-input features such as location, property type, size, and amenities.
 
 
